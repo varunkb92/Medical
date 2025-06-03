@@ -504,190 +504,219 @@ def main_app():
     
     if page == "🆕 New Patient Assessment":
         
-        # Patient Assessment Form (matching original layout)
+        # Patient Assessment Form (Updated with new specifications)
         st.markdown("### 📋 Patient Information & Risk Assessment")
         
-        # Patient demographics
-        st.markdown("#### 👤 Patient Demographics")
-        col1, col2, col3 = st.columns(3)
+        # Section 1: Patient Characteristics
+        st.markdown("#### 👤 Section 1: Patient Characteristics")
+        col1, col2 = st.columns(2)
         
         with col1:
-            uhid = st.text_input("🆔 UHID/MRN", placeholder="Hospital ID", help="Unique Hospital Identification")
-            patient_name = st.text_input("👤 Patient Name", placeholder="Full name")
+            uhid = st.text_input("🆔 Patient UHID", placeholder="Enter UHID")
+            patient_name = st.text_input("👤 Patient Name", placeholder="Enter full name")
         
         with col2:
-            age = st.number_input("🎂 Age (years)", min_value=18, max_value=100, value=50)
-            menopausal_status = st.selectbox("🔄 Menopausal Status", 
-                ["Pre-menopausal", "Post-menopausal", "Peri-menopausal"])
-        
-        with col3:
-            assessment_date = st.date_input("📅 Assessment Date", value=datetime.now().date())
-        
-        st.markdown("---")
-        
-        # Tumor characteristics
-        st.markdown("#### 🔬 Tumor Characteristics")
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            tumor_size = st.number_input("📏 Tumor Size (cm)", 
-                                       min_value=0.1, max_value=20.0, value=2.0, step=0.1,
-                                       help="Largest diameter of invasive component")
-            lymph_nodes = st.number_input("🔗 Positive Lymph Nodes", 
-                                        min_value=0, max_value=50, value=0,
-                                        help="Number of positive lymph nodes")
-        
-        with col2:
-            tumor_grade = st.selectbox("⭐ Tumor Grade", 
-                                     ["Grade 1", "Grade 2", "Grade 3"],
-                                     help="Nottingham histologic grade")
-            histological_type = st.selectbox("🧪 Histological Type", [
-                "Invasive Ductal Carcinoma", 
-                "Invasive Lobular Carcinoma", 
-                "Mixed Ductal and Lobular", 
-                "Inflammatory Breast Cancer",
-                "Other"
-            ])
-        
-        with col3:
-            ki67 = st.number_input("📊 Ki67 Index (%)", 
-                                 min_value=0.0, max_value=100.0, value=15.0, step=0.1,
-                                 help="Proliferation marker percentage")
-        
-        st.markdown("---")
-        
-        # Biomarkers
-        st.markdown("#### 🧬 Biomarker Status")
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            er_status = st.selectbox("🟢 ER Status", ["Positive", "Negative"],
-                                   help="Estrogen Receptor status")
-            pr_status = st.selectbox("🔵 PR Status", ["Positive", "Negative"],
-                                   help="Progesterone Receptor status")
-        
-        with col2:
-            her2_status = st.selectbox("🟡 HER2 Status", ["Positive", "Negative", "Equivocal"],
-                                     help="HER2/neu status")
-        
-        with col3:
-            st.markdown("**Molecular Subtype (Auto-calculated)**")
-            if er_status == "Positive" and her2_status == "Negative":
-                if ki67 < 14:
-                    subtype_preview = "Luminal A-like"
-                else:
-                    subtype_preview = "Luminal B-like"
-            elif her2_status == "Positive":
-                subtype_preview = "HER2-positive"
-            else:
-                subtype_preview = "Triple-negative"
+            age = st.number_input("🎂 Age", min_value=1, max_value=120, value=50)
             
-            st.info(f"Predicted: {subtype_preview}")
+            # Age validation
+            if age < 18:
+                st.warning("⚠️ Age should be 18 or above for breast cancer assessment")
+            elif age > 100:
+                st.warning("⚠️ Please verify age - unusually high value")
+            
+            menopausal_status = st.selectbox("🔄 Menopausal Status", 
+                ["Premenopausal", "Postmenopausal"])
         
-        # Clinical notes
-        st.markdown("#### 📝 Clinical Notes")
-        notes = st.text_area("Additional Information", 
-                           placeholder="Comorbidities, family history, previous treatments, etc.",
-                           height=100)
+        st.markdown("---")
+        
+        # Section 2: Anatomic Risk
+        st.markdown("#### 🔬 Section 2: Anatomic Risk")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            tumor_size = st.selectbox("📏 Tumour Size", 
+                ["T1 (<2 cm)", "T2 (2-5 cm)", "T3 (>5 cm)"])
+        
+        with col2:
+            nodal_status = st.selectbox("🔗 Nodal Status", 
+                ["N0 (0 nodes)", "N1 (1-3 nodes)", "N2+ (>=4 nodes)"])
+        
+        st.markdown("---")
+        
+        # Section 3: Tumor Biology/Genomic
+        st.markdown("#### 🧬 Section 3: Tumor Biology/Genomic")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            tumor_grade = st.selectbox("⭐ Grading", 
+                ["Grade 1", "Grade 2", "Grade 3"])
+            
+            ki67 = st.number_input("📊 Ki-67 (%)", 
+                                 min_value=0.0, max_value=100.0, value=15.0, step=0.1)
+            
+            # Ki67 validation
+            if ki67 > 100:
+                st.error("❌ Ki-67 percentage cannot exceed 100%")
+            elif ki67 < 0:
+                st.error("❌ Ki-67 percentage cannot be negative")
+        
+        with col2:
+            st.markdown("**Genomic Test:**")
+            genomic_test_name = st.text_input("Name of test", placeholder="e.g., Oncotype DX, MammaPrint")
+            genomic_test_report = st.text_area("Report of test", 
+                                             placeholder="Enter test results/report details",
+                                             height=100)
         
         # Calculate button
         st.markdown("---")
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            calculate_button = st.button("🔬 Calculate Risk Assessment", 
+            calculate_button = st.button("🔬 Submit & Calculate Risk", 
                                        type="primary", 
-                                       use_container_width=True,
-                                       help="Perform comprehensive risk analysis")
+                                       use_container_width=True)
         
         # Risk calculation and display
         if calculate_button:
-            if uhid and patient_name:
-                # Perform calculations
-                risk_score, npi, risk_factors, molecular_subtype = calculate_comprehensive_risk_score(
-                    tumor_size, lymph_nodes, tumor_grade, er_status, pr_status, 
-                    her2_status, age, ki67, histological_type
-                )
+            if uhid and patient_name and age >= 18 and 0 <= ki67 <= 100:
                 
-                risk_category, risk_color, prognosis = get_risk_category_detailed(risk_score)
-                treatment_recs = generate_treatment_recommendations(
-                    risk_score, er_status, pr_status, her2_status, age, tumor_size, lymph_nodes
-                )
+                # Risk calculation logic as specified
+                def calculate_risk_category(nodal_status, tumor_size, tumor_grade, ki67):
+                    """Calculate risk category based on exact specified logic"""
+                    
+                    # If Nodal Status = N2+ then output = "High Risk"
+                    if "N2+" in nodal_status:
+                        return "High Risk"
+                    
+                    # If Nodal Status = N1 then output = "High Risk"
+                    elif "N1" in nodal_status:
+                        return "High Risk"
+                    
+                    # If Nodal Status = N0
+                    elif "N0" in nodal_status:
+                        
+                        # If Nodal Status = N0 and Tumor Size = T3 then output = "High Risk"
+                        if "T3" in tumor_size:
+                            return "High Risk"
+                        
+                        # If Nodal Status = N0 and Tumor Size = T1 then output = "Low Risk"
+                        elif "T1" in tumor_size:
+                            return "Low Risk"
+                        
+                        # If Nodal Status = N0 and Tumor Size = T2
+                        elif "T2" in tumor_size:
+                            
+                            # If Nodal Status = N0 and Tumor Size = T2 and Grade = Grade 3 then output = "High Risk"
+                            if tumor_grade == "Grade 3":
+                                return "High Risk"
+                            
+                            # If Nodal Status = N0 and Tumor Size = T2 and Grade = Grade 1 then output = "Low Risk"
+                            elif tumor_grade == "Grade 1":
+                                return "Low Risk"
+                            
+                            # If Nodal Status = N0 and Tumor Size = T2 and Grade = Grade 2
+                            elif tumor_grade == "Grade 2":
+                                
+                                # If Nodal Status = N0 and Tumor Size = T2 and Grade = Grade 2 and Ki-67 >= 20% then output = "High Risk"
+                                if ki67 >= 20:
+                                    return "High Risk"
+                                
+                                # If Nodal Status = N0 and Tumor Size = T2 and Grade = Grade 2 and Ki-67 < 20% then output = "Low Risk"
+                                else:
+                                    return "Low Risk"
+                    
+                    # This should not be reached with valid inputs
+                    return "Unable to determine risk"
                 
-                # Display results in original style
+                # Calculate risk
+                risk_category = calculate_risk_category(nodal_status, tumor_size, tumor_grade, ki67)
+                
+                # Display results
                 st.markdown("---")
                 st.markdown("## 🎯 Risk Assessment Results")
                 
-                # Main metrics
-                col1, col2, col3, col4 = st.columns(4)
+                # Risk category display
+                if risk_category == "High Risk":
+                    risk_color = "#D32F2F"  # Red
+                elif risk_category == "Low Risk":
+                    risk_color = "#4CAF50"  # Green
+                else:
+                    risk_color = "#FF9800"  # Orange
                 
-                with col1:
-                    st.markdown(f"""
-                    <div style="background: linear-gradient(45deg, #FF6B6B, #FF8E8E); 
-                                padding: 1rem; border-radius: 10px; text-align: center;">
-                        <h3 style="color: white; margin: 0;">Risk Score</h3>
-                        <h1 style="color: white; margin: 0;">{risk_score:.1f}</h1>
-                        <p style="color: white; margin: 0;">/ 100</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
+                col1, col2, col3 = st.columns([1, 2, 1])
                 with col2:
                     st.markdown(f"""
                     <div style="background: {risk_color}; 
-                                padding: 1rem; border-radius: 10px; text-align: center;">
-                        <h3 style="color: white; margin: 0;">Risk Category</h3>
-                        <h2 style="color: white; margin: 0;">{risk_category}</h2>
-                        <p style="color: white; margin: 0;">{prognosis}</p>
+                                padding: 2rem; 
+                                border-radius: 15px; 
+                                text-align: center;
+                                box-shadow: 0 8px 25px rgba(0,0,0,0.15);">
+                        <h1 style="color: white; margin: 0; font-size: 3rem;">🎯</h1>
+                        <h2 style="color: white; margin: 1rem 0;">Risk Assessment Result</h2>
+                        <h1 style="color: white; margin: 0; font-size: 2.5rem;">{risk_category}</h1>
                     </div>
                     """, unsafe_allow_html=True)
                 
-                with col3:
-                    st.markdown(f"""
-                    <div style="background: linear-gradient(45deg, #4ECDC4, #44A08D); 
-                                padding: 1rem; border-radius: 10px; text-align: center;">
-                        <h3 style="color: white; margin: 0;">NPI Score</h3>
-                        <h1 style="color: white; margin: 0;">{npi:.1f}</h1>
-                        <p style="color: white; margin: 0;">Nottingham Index</p>
-                    </div>
-                    """, unsafe_allow_html=True)
+                # Patient summary
+                st.markdown("### 📋 Patient Summary")
+                col1, col2 = st.columns(2)
                 
-                with col4:
-                    st.markdown(f"""
-                    <div style="background: linear-gradient(45deg, #A8EDEA, #FED6E3); 
-                                padding: 1rem; border-radius: 10px; text-align: center;">
-                        <h3 style="color: #2c3e50; margin: 0;">Molecular Type</h3>
-                        <h2 style="color: #2c3e50; margin: 0;">{molecular_subtype}</h2>
-                        <p style="color: #2c3e50; margin: 0;">Subtype</p>
-                    </div>
-                    """, unsafe_allow_html=True)
+                with col1:
+                    st.markdown("**Patient Information:**")
+                    st.text(f"UHID: {uhid}")
+                    st.text(f"Name: {patient_name}")
+                    st.text(f"Age: {age} years")
+                    st.text(f"Menopausal Status: {menopausal_status}")
                 
-                # Risk factors
-                st.markdown("### 🚨 Risk Factors Identified")
-                if risk_factors:
-                    for factor in risk_factors:
-                        st.markdown(f"• {factor}")
-                else:
-                    st.info("No significant risk factors identified")
+                with col2:
+                    st.markdown("**Assessment Parameters:**")
+                    st.text(f"Tumour Size: {tumor_size}")
+                    st.text(f"Nodal Status: {nodal_status}")
+                    st.text(f"Grade: {tumor_grade}")
+                    st.text(f"Ki-67: {ki67}%")
                 
-                # Treatment recommendations
-                st.markdown("### 💊 Treatment Recommendations")
+                # Genomic test results (if provided)
+                if genomic_test_name or genomic_test_report:
+                    st.markdown("### 🧬 Genomic Test Information")
+                    if genomic_test_name:
+                        st.text(f"Test Name: {genomic_test_name}")
+                    if genomic_test_report:
+                        st.text_area("Test Report:", value=genomic_test_report, height=100, disabled=True)
                 
-                tab1, tab2, tab3, tab4 = st.tabs(["🧪 Systemic Therapy", "⚡ Radiation", "🔪 Surgery", "📅 Follow-up"])
+                # Save to database
+                cursor = conn.cursor()
                 
-                with tab1:
-                    if treatment_recs["chemotherapy"]:
-                        st.markdown("**Chemotherapy:**")
-                        for rec in treatment_recs["chemotherapy"]:
-                            st.markdown(f"• {rec}")
-                    
-                    if treatment_recs["hormonal"]:
-                        st.markdown("**Hormonal Therapy:**")
-                        for rec in treatment_recs["hormonal"]:
-                            st.markdown(f"• {rec}")
-                    
-                    if treatment_recs["targeted"]:
-                        st.markdown("**Targeted Therapy:**")
-                        for rec in treatment_recs["targeted"]:
-                            st.markdown(f"• {rec}")
+                # Save patient data (simplified fields)
+                cursor.execute('''
+                    INSERT OR REPLACE INTO patients 
+                    (uhid, patient_name, age, menopausal_status, tumor_size, lymph_nodes_positive,
+                     tumor_grade, ki67_percentage, assessment_date, risk_score, risk_category, 
+                     treatment_recommendation, notes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (uhid, patient_name, age, menopausal_status, tumor_size, 
+                      nodal_status, tumor_grade, ki67, datetime.now(), 
+                      0,  # No numeric score in new logic
+                      risk_category, 
+                      f"Genomic Test: {genomic_test_name}" if genomic_test_name else "",
+                      genomic_test_report if genomic_test_report else ""))
+                
+                conn.commit()
+                
+                st.success("✅ Patient assessment completed and saved successfully!")
+                
+            else:
+                # Validation errors
+                error_messages = []
+                if not uhid:
+                    error_messages.append("Patient UHID is required")
+                if not patient_name:
+                    error_messages.append("Patient Name is required")
+                if age < 18:
+                    error_messages.append("Age must be 18 or above")
+                if not (0 <= ki67 <= 100):
+                    error_messages.append("Ki-67 percentage must be between 0 and 100")
+                
+                for error in error_messages:
+                    st.error(f"❌ {error}")
                 
                 with tab2:
                     for rec in treatment_recs["radiation"]:
